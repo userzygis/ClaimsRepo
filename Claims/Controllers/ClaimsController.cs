@@ -1,12 +1,17 @@
+using Claims.ActionModels.Responses;
 using Claims.Auditing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
+using Claims.ActionModels;
+using Claims.ActionModels.Responses.ClaimsResponses;
+using Claims.ActionModels.Requests.ClaimsRequests;
 
 namespace Claims.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class ClaimsController : ControllerBase
+    [Route("api/v1/claims")]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(InternalServerErrorResponse))]
+    public class ClaimsController : ApiControllerBase
     {
         
         private readonly ILogger<ClaimsController> _logger;
@@ -20,35 +25,43 @@ namespace Claims.Controllers
             _auditer = new Auditer(auditContext);
         }
 
-        [HttpGet]
-        public Task<IEnumerable<Claim>> GetAsync()
+        [HttpGet()]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetClaimsResponse))]
+        public async Task<ActionResult> GetAsync(GetClaimsRequest request)
         {
-            return _cosmosDbService.GetClaimsAsync();
+            var claims = await _cosmosDbService.GetClaimsAsync();
+            return Ok(new GetClaimsResponse() { Claims = claims });
         }
 
-        [HttpPost]
-        public async Task<ActionResult> CreateAsync(Claim claim)
+        [HttpPut("claim")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CreateClaimResponse))]
+        public async Task<ActionResult> CreateAsync(CreateClaimRequest request)
         {
+            var claim = request.Claim;
             claim.Id = Guid.NewGuid().ToString();
             await _cosmosDbService.AddItemAsync(claim);
             _auditer.AuditClaim(claim.Id, "POST");
-            return Ok(claim);
+            return Ok(new CreateClaimResponse() { Id = claim.Id });
         }
 
-        [HttpDelete("{id}")]
-        public Task DeleteAsync(string id)
+        [HttpDelete("claim/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DeleteClaimResponse))]
+        public async Task<ActionResult> DeleteAsync(DeleteClaimRequest request)
         {
-            _auditer.AuditClaim(id, "DELETE");
-            return _cosmosDbService.DeleteItemAsync(id);
+            _auditer.AuditClaim(request.Id, "DELETE");
+            await _cosmosDbService.DeleteItemAsync(request.Id);
+            return Ok(new DeleteClaimResponse());
         }
 
-        [HttpGet("{id}")]
-        public Task<Claim> GetAsync(string id)
+        [HttpGet("claim/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetClaimResponse))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ClaimNotFoundResponse))]
+        public async Task<ActionResult> GetAsync(GetClaimRequest request)
         {
-            return _cosmosDbService.GetClaimAsync(id);
+            var claim = await _cosmosDbService.GetClaimAsync(request.Id);
+            return claim != null ? Ok(new GetClaimResponse() { Claim = claim }) : ClaimNotFound(request.Id);
         }
     }
-
     public class CosmosDbService
     {
         private readonly Container _container;

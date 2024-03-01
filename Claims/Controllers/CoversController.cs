@@ -1,3 +1,8 @@
+using Azure.Core;
+using Claims.ActionModels;
+using Claims.ActionModels.Requests.CoverRequests;
+using Claims.ActionModels.Responses;
+using Claims.ActionModels.Responses.CoverResponses;
 using Claims.Auditing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
@@ -5,8 +10,9 @@ using Microsoft.Azure.Cosmos;
 namespace Claims.Controllers;
 
 [ApiController]
-[Route("[controller]")]
-public class CoversController : ControllerBase
+[Route("api/v1/covers")]
+[ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(InternalServerErrorResponse))]
+public class CoversController : ApiControllerBase
 {
     private readonly ILogger<CoversController> _logger;
     private readonly Auditer _auditer;
@@ -19,16 +25,23 @@ public class CoversController : ControllerBase
         _container = cosmosClient?.GetContainer("ClaimDb", "Cover")
                      ?? throw new ArgumentNullException(nameof(cosmosClient));
     }
-    
-    [HttpPost]
-    public async Task<ActionResult> ComputePremiumAsync(DateOnly startDate, DateOnly endDate, CoverType coverType)
+
+    [HttpPost("computePremium")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ComputePremiumResponse))]
+    public async Task<ActionResult> ComputePremiumAsync(ComputePremiumRequest request)
     {
-        return Ok(ComputePremium(startDate, endDate, coverType));
+        //todo mv ComputePremium to svc
+        //todo make computepremium async?: with when all complete
+        var response = new ComputePremiumResponse() { TotalPremium = ComputePremium(request.StartDate, request.EndDate, request.CoverType) };
+
+        return Ok(response);
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Cover>>> GetAsync()
+    [HttpGet()]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetCoversResponse))]
+    public async Task<ActionResult> GetAsync(GetCoversRequest request)
     {
+        //todo mv to svc:
         var query = _container.GetItemQueryIterator<Cover>(new QueryDefinition("SELECT * FROM c"));
         var results = new List<Cover>();
         while (query.HasMoreResults)
@@ -38,38 +51,48 @@ public class CoversController : ControllerBase
             results.AddRange(response.ToList());
         }
 
-        return Ok(results);
+        return Ok(new GetCoversResponse() { Covers = results });
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Cover>> GetAsync(string id)
+    [HttpGet("cover{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetCoverResponse))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(CoverNotFoundResponse))]
+    public async Task<ActionResult> GetAsync(GetCoverRequest request)
     {
         try
         {
-            var response = await _container.ReadItemAsync<Cover>(id, new (id));
-            return Ok(response.Resource);
+            var response = await _container.ReadItemAsync<Cover>(request.Id, new (request.Id));
+            return response != null ? Ok(new GetCoverResponse() { Cover = response.Resource }) : CoverNotFound(request.Id);
         }
+        //todo move this catch to svc return null instead, handle in middleware
         catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
             return NotFound();
         }
     }
 
-    [HttpPost]
-    public async Task<ActionResult> CreateAsync(Cover cover)
+    [HttpPut("cover")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CreateCoverResponse))]
+    public async Task<ActionResult> CreateAsync(CreateCoverRequest request)
     {
+        var cover = request.Cover;
         cover.Id = Guid.NewGuid().ToString();
         cover.Premium = ComputePremium(cover.StartDate, cover.EndDate, cover.Type);
         await _container.CreateItemAsync(cover, new PartitionKey(cover.Id));
         _auditer.AuditCover(cover.Id, "POST");
-        return Ok(cover);
+        return Ok(new CreateCoverResponse()
+        {
+            Id = cover.Id
+        });
     }
 
-    [HttpDelete("{id}")]
-    public Task DeleteAsync(string id)
+    [HttpDelete("cover/{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DeleteCoverResponse))]
+    public async Task<ActionResult> DeleteAsync(DeleteCoverRequest request)
     {
-        _auditer.AuditCover(id, "DELETE");
-        return _container.DeleteItemAsync<Cover>(id, new (id));
+        _auditer.AuditCover(request.Id, "DELETE");
+        var cover = await _container.DeleteItemAsync<Cover>(request.Id, new (request.Id));
+        return Ok(new DeleteCoverResponse() { ItemResponseCover = cover });
     }
 
     private decimal ComputePremium(DateOnly startDate, DateOnly endDate, CoverType coverType)
