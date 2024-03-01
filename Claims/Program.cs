@@ -1,8 +1,10 @@
 using System.Configuration;
+using System.Reflection;
 using System.Text.Json.Serialization;
 using Claims.Auditing;
 using Claims.Controllers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,7 +23,30 @@ builder.Services.AddDbContext<AuditContext>(options => options.UseSqlServer(buil
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Claims API",
+        Version = "v1",
+        Description = "Claims API description",
+        Contact = new OpenApiContact
+        {
+            Name = "Claims.com",
+            Email = "Claims@Claims.com",
+            Url = new Uri("https://www.Claims.com")
+        }
+
+
+    });
+
+    //bin\Debug\net7.0\Claims.xml
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+}
+
+);
 
 var app = builder.Build();
 

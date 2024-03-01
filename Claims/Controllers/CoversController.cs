@@ -26,6 +26,11 @@ public class CoversController : ApiControllerBase
                      ?? throw new ArgumentNullException(nameof(cosmosClient));
     }
 
+    /// <summary>
+    /// Computes premium
+    /// </summary>
+    /// <param name="request">params for computation</param>
+    /// <returns></returns>
     [HttpPost("computePremium")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ComputePremiumResponse))]
     public async Task<ActionResult> ComputePremiumAsync(ComputePremiumRequest request)
@@ -37,6 +42,11 @@ public class CoversController : ApiControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Gets all covers
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [HttpGet()]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetCoversResponse))]
     public async Task<ActionResult> GetAsync(GetCoversRequest request)
@@ -54,6 +64,11 @@ public class CoversController : ApiControllerBase
         return Ok(new GetCoversResponse() { Covers = results });
     }
 
+    /// <summary>
+    /// Gets cover by id
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [HttpGet("cover{id}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetCoverResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(CoverNotFoundResponse))]
@@ -71,6 +86,11 @@ public class CoversController : ApiControllerBase
         }
     }
 
+    /// <summary>
+    /// Creates cover
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [HttpPut("cover")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CreateCoverResponse))]
     public async Task<ActionResult> CreateAsync(CreateCoverRequest request)
@@ -86,6 +106,11 @@ public class CoversController : ApiControllerBase
         });
     }
 
+    /// <summary>
+    /// Deletes cover
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [HttpDelete("cover/{id}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DeleteCoverResponse))]
     public async Task<ActionResult> DeleteAsync(DeleteCoverRequest request)

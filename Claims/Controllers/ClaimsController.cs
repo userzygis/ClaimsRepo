@@ -25,6 +25,11 @@ namespace Claims.Controllers
             _auditer = new Auditer(auditContext);
         }
 
+        /// <summary>
+        /// Gets all claims
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpGet()]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetClaimsResponse))]
         public async Task<ActionResult> GetAsync(GetClaimsRequest request)
@@ -33,6 +38,11 @@ namespace Claims.Controllers
             return Ok(new GetClaimsResponse() { Claims = claims });
         }
 
+        /// <summary>
+        /// Creates claims
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPut("claim")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CreateClaimResponse))]
         public async Task<ActionResult> CreateAsync(CreateClaimRequest request)
@@ -44,6 +54,11 @@ namespace Claims.Controllers
             return Ok(new CreateClaimResponse() { Id = claim.Id });
         }
 
+        /// <summary>
+        /// Deletes claim
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpDelete("claim/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DeleteClaimResponse))]
         public async Task<ActionResult> DeleteAsync(DeleteClaimRequest request)
@@ -53,6 +68,11 @@ namespace Claims.Controllers
             return Ok(new DeleteClaimResponse());
         }
 
+        /// <summary>
+        /// Gets claims by id
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpGet("claim/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetClaimResponse))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ClaimNotFoundResponse))]

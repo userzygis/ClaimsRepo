@@ -4,6 +4,9 @@ namespace Claims.ActionModels;
 
 public class Cover
 {
+    /// <summary>
+    /// unique identifier
+    /// </summary>
     [JsonProperty(PropertyName = "id")]
     public string Id { get; set; }
 
