@@ -1,6 +1,6 @@
 ﻿namespace Claims.Domain.ActionModels.Responses.ClaimsResponses
 {
-    public class ClaimNotFoundResponse : ResponseBase
+    public class ClaimNotFoundResponse
     {
     }
 }

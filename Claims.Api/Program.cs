@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Claims.Api.Configurations;
+using Claims.Api.Middlewares;
 using Claims.Domain.Dtos;
 using Claims.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +50,9 @@ builder.Services.AddSwaggerGen(c =>
 );
 
 var app = builder.Build();
+app.Logger.LogInformation("Claims.Api started");
+
+app.UseMiddleware<CustomClaimsMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

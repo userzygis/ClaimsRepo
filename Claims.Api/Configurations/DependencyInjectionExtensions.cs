@@ -8,6 +8,7 @@ using Claims.Services.Mappers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Azure.Cosmos;
 using Claims.Domain;
+using Claims.Services.Validators;
 
 namespace Claims.Api.Configurations
 {
@@ -15,12 +16,15 @@ namespace Claims.Api.Configurations
     {
         public static void ConfigureDependencyInjection(this IServiceCollection services, AppSettingsDto appSettings)
         {
+            #region repository
             services.AddDbContext<AuditContext>(options => options.UseSqlServer(appSettings.ConnectionStrings.DefaultConnection));
             InitializeCosmosClient(services, appSettings).Wait();
-
-            #region repository
             services.AddScoped<IAuditerRepository, AuditerRepository>();
+            #endregion
 
+            #region validators
+            services.AddScoped<ICoversValidator, CoversValidator>();
+            services.AddScoped<IClaimsValidator, ClaimsValidator>();
             #endregion
 
             #region mappers

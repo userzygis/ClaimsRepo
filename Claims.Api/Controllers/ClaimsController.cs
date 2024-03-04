@@ -11,12 +11,10 @@ namespace Claims.Controllers
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(InternalServerErrorResponse))]
     public class ClaimsController : ApiControllerBase
     {        
-        private readonly ILogger<ClaimsController> _logger; //todso logergerger
         private readonly IClaimsService _claimsService;
 
-        public ClaimsController(ILogger<ClaimsController> logger, IClaimsService claimsService)
+        public ClaimsController(IClaimsService claimsService)
         {
-            _logger = logger;
             _claimsService = claimsService;
         }
 
@@ -41,6 +39,7 @@ namespace Claims.Controllers
         /// <returns></returns>
         [HttpPut("claim")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CreateClaimResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationErrorResponse))]
         public async Task<ActionResult> CreateAsync(CreateClaimRequest request)
         {
             var createdClaimId = await _claimsService.AddClaimAsync(request.Claim);

@@ -10,22 +10,31 @@ namespace Claims.Services.Impl
         private readonly IAuditerService _auditerService;
         private readonly ICoversRepository _coversRepository;
         private readonly ICoversMapper _coversMapper;
-
-        public CoversService(IPremiumCalcService premiumCalcService, IAuditerService auditerService, ICoversRepository coversRepository, ICoversMapper coversMapper)
+        private readonly ICoversValidator _coversValidator;
+        
+        public CoversService(IPremiumCalcService premiumCalcService, IAuditerService auditerService, ICoversRepository coversRepository, ICoversMapper coversMapper, ICoversValidator coversValidator)
         {
             _premiumCalcService = premiumCalcService;
             _auditerService = auditerService;
             _coversRepository = coversRepository;
-            _coversMapper = coversMapper;   
+            _coversMapper = coversMapper;
+            _coversValidator = coversValidator;
         }
 
         public async Task<string> AddCoverAsync(Cover cover)
         {
+            PerformValidation(cover);
             cover.Premium = await _premiumCalcService.ComputePremiumAsync(cover);
             var coverModel = _coversMapper.FromRequest(cover);
             await _coversRepository.AddCoverAsync(coverModel);
             _auditerService.AuditCoverCreate(coverModel.Id);
             return coverModel.Id;
+        }
+
+        private void PerformValidation(Cover cover)
+        {
+            _coversValidator.ValidateStartDate(cover);
+            _coversValidator.ValidateTotalInsurancePeriod(cover);
         }
 
         public async Task DeleteCoverAsync(string id)

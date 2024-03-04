@@ -10,20 +10,32 @@ namespace Claims.Services.Impl
         private readonly IAuditerService _auditerService;
         private readonly IClaimsRepository _claimsRepository;
         private readonly IClaimsMapper _claimsMapper;
-        
-        public ClaimsService(IAuditerService auditerService, IClaimsRepository claimsRepository, IClaimsMapper claimsMapper)
+        private readonly IClaimsValidator _claimsValidator;
+        private readonly ICoversRepository _coversRepository;
+
+        public ClaimsService(IAuditerService auditerService, IClaimsRepository claimsRepository, IClaimsMapper claimsMapper, IClaimsValidator claimsValidator, ICoversRepository coversRepository)
         {
             _auditerService = auditerService;
             _claimsRepository = claimsRepository;
             _claimsMapper = claimsMapper;
+            _claimsValidator = claimsValidator;
+            _coversRepository = coversRepository;
         }
 
         public async Task<string> AddClaimAsync(Claim claim)
-        {            
+        {
+            await PerformValidation(claim);
             ClaimModel claimModel = _claimsMapper.FromRequest(claim);
-             await _claimsRepository.AddClaimAsync(claimModel);
+            await _claimsRepository.AddClaimAsync(claimModel);
             _auditerService.AuditClaimCreate(claimModel.Id);
             return claimModel.Id;
+        }
+
+        private async Task PerformValidation(Claim claim)
+        {
+            _claimsValidator.ValidateDamageCost(claim);
+            var coverModel = await _coversRepository.GetCoverAsync(claim.CoverId);
+            _claimsValidator.ValidateCreatedDate(claim, coverModel);
         }
 
         public async Task DeleteClaimAsync(string id)

@@ -1,6 +1,6 @@
 ﻿namespace Claims.Domain.ActionModels.Responses.CoverResponses
 {
-    public class GetCoversResponse : ResponseBase
+    public class GetCoversResponse
     {
         public IEnumerable<Cover> Covers { get; set; }
     }

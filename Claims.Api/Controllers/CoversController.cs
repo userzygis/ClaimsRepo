@@ -13,13 +13,11 @@ namespace Claims.Controllers;
 [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(InternalServerErrorResponse))]
 public class CoversController : ApiControllerBase
 {
-    private readonly ILogger<CoversController> _logger; //todso logergerger
     private readonly ICoversService _coversService;
     private readonly IPremiumCalcService _premiumCalcService;
 
-    public CoversController(ILogger<CoversController> logger, ICoversService coversService, IPremiumCalcService premiumCalcService)
+    public CoversController(ICoversService coversService, IPremiumCalcService premiumCalcService)
     {
-        _logger = logger;
         _coversService = coversService;
         _premiumCalcService = premiumCalcService;
     }
@@ -72,6 +70,7 @@ public class CoversController : ApiControllerBase
     /// <returns></returns>
     [HttpPut("cover")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CreateCoverResponse))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ValidationErrorResponse))]
     public async Task<ActionResult> CreateAsync(CreateCoverRequest request)
     {
         var createdCoverId = await _coversService.AddCoverAsync(request.Cover);
