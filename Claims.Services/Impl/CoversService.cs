@@ -27,7 +27,7 @@ namespace Claims.Services.Impl
             cover.Premium = await _premiumCalcService.ComputePremiumAsync(cover);
             var coverModel = _coversMapper.FromRequest(cover);
             await _coversRepository.AddCoverAsync(coverModel);
-            _auditerService.AuditCoverCreate(coverModel.Id);
+            await _auditerService.AuditCoverCreateAsync(coverModel.Id);
             return coverModel.Id;
         }
 
@@ -40,7 +40,7 @@ namespace Claims.Services.Impl
         public async Task DeleteCoverAsync(string id)
         {
             await _coversRepository.DeleteCoverAsync(id);
-            _auditerService.AuditCoverDelete(id);
+            await _auditerService.AuditCoverDeleteAsync(id);
         }
 
         public async Task<Cover> GetCoverAsync(string id)

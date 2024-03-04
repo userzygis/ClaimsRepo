@@ -5,7 +5,7 @@ using Claims.Services.Interfaces;
 namespace Claims.Services.Impl
 {
     //todo better idea would be to use service bus: await ServiceBus.SendQueueAsync(content, AuditQueueName, ttl, messageType: messageType)
-    //and then consume this message and put in db
+    //and then create sb consumer (azure function app) to process queue messages and put in db
     public class AuditerService: IAuditerService
     {
         private readonly IAuditerRepository _auditerRepository;
@@ -14,28 +14,24 @@ namespace Claims.Services.Impl
             _auditerRepository = auditerRepository;
         }
 
-        public void AuditClaimCreate(string id)
+        public async Task AuditClaimCreateAsync(string id)
         {
-            //todo add logging?
-            _auditerRepository.AuditClaim(id, Constants.AuditTypeCreate);
+            await _auditerRepository.AuditClaimAsync(id, Constants.AuditTypeCreate);
         }
 
-        public void AuditClaimDelete(string id)
+        public async Task AuditClaimDeleteAsync(string id)
         {
-            //todo add logging?
-            _auditerRepository.AuditClaim(id, Constants.AuditTypeDelete);
+            await _auditerRepository.AuditClaimAsync(id, Constants.AuditTypeDelete);
         }
 
-        public void AuditCoverCreate(string id)
+        public async Task AuditCoverCreateAsync(string id)
         {
-            //todo add logging?
-            _auditerRepository.AuditCover(id, Constants.AuditTypeCreate);
+            await _auditerRepository.AuditCoverAsync(id, Constants.AuditTypeCreate);
         }
 
-        public void AuditCoverDelete(string id)
+        public async Task AuditCoverDeleteAsync(string id)
         {
-            //todo add logging?
-            _auditerRepository.AuditCover(id, Constants.AuditTypeDelete);
+            await _auditerRepository.AuditCoverAsync(id, Constants.AuditTypeDelete);
         }
     }
 }

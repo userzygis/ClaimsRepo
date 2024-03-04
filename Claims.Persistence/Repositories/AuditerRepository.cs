@@ -12,7 +12,7 @@ namespace Claims.Persistence.Repositories
             _auditContext = auditContext;
         }
 
-        public void AuditClaim(string id, string httpRequestType)
+        public async Task AuditClaimAsync(string id, string httpRequestType)
         {
             var claimAudit = new ClaimAudit()
             {
@@ -21,11 +21,10 @@ namespace Claims.Persistence.Repositories
                 ClaimId = id
             };
 
-            _auditContext.Add(claimAudit);
-            _auditContext.SaveChanges();
+            await AuditAsync(claimAudit);
         }
         
-        public void AuditCover(string id, string httpRequestType)
+        public async Task AuditCoverAsync(string id, string httpRequestType)
         {
             var coverAudit = new CoverAudit()
             {
@@ -34,8 +33,13 @@ namespace Claims.Persistence.Repositories
                 CoverId = id
             };
 
-            _auditContext.Add(coverAudit);
-            _auditContext.SaveChanges();
+            await AuditAsync(coverAudit);
+        }
+
+        private async Task AuditAsync(AuditingBase auditData)
+        {
+            await _auditContext.AddAsync(auditData);
+            await _auditContext.SaveChangesAsync();
         }
     }
 }

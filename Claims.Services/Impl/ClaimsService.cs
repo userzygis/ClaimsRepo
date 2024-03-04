@@ -27,7 +27,7 @@ namespace Claims.Services.Impl
             await PerformValidation(claim);
             ClaimModel claimModel = _claimsMapper.FromRequest(claim);
             await _claimsRepository.AddClaimAsync(claimModel);
-            _auditerService.AuditClaimCreate(claimModel.Id);
+            await _auditerService.AuditClaimCreateAsync(claimModel.Id);
             return claimModel.Id;
         }
 
@@ -41,7 +41,7 @@ namespace Claims.Services.Impl
         public async Task DeleteClaimAsync(string id)
         {
             await _claimsRepository.DeleteClaimAsync(id); 
-            _auditerService.AuditClaimDelete(id);
+            await _auditerService.AuditClaimDeleteAsync(id);
         }
 
         public async Task<Claim> GetClaimAsync(string id)

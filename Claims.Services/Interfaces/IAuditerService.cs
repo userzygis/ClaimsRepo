@@ -2,12 +2,12 @@
 {
     public interface IAuditerService
     {
-        void AuditClaimCreate(string id);
+        Task AuditClaimCreateAsync(string id);
 
-        void AuditClaimDelete(string id);
+        Task AuditClaimDeleteAsync(string id);
 
-        void AuditCoverCreate(string id);
+        Task AuditCoverCreateAsync(string id);
 
-        void AuditCoverDelete(string id);
+        Task AuditCoverDeleteAsync(string id);
     }
 }
