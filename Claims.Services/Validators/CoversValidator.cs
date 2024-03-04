@@ -1,7 +1,6 @@
 ﻿using Claims.Domain.ActionModels;
 using Claims.Domain.Exceptions;
 using Claims.Services.Interfaces;
-using System.ComponentModel.DataAnnotations;
 
 namespace Claims.Services.Validators
 {

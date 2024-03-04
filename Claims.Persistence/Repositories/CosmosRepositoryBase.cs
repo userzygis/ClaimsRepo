@@ -1,6 +1,5 @@
 ﻿using Claims.Persistence.DbModels;
 using Microsoft.Azure.Cosmos;
-using System.Security.Claims;
 
 namespace Claims.Persistence.Repositories
 {
@@ -30,7 +29,6 @@ namespace Claims.Persistence.Repositories
             try
             {
                 var response = await _container.ReadItemAsync<T>(id, new(id));
-                //TODO : var response = await _container.ReadItemAsync<ClaimModel>(id, new PartitionKey(id));
                 return response.Resource;
             }
             catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
