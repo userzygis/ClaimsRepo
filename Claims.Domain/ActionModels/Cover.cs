@@ -7,8 +7,8 @@ public class Cover : IComputePremiumData
     /// <summary>
     /// unique identifier
     /// </summary>
-    [JsonProperty(PropertyName = "id", Required = Required.AllowNull)]
-    public string Id { get; set; }
+    [JsonProperty(PropertyName = "id")]
+    public string? Id { get; set; }
 
     [JsonProperty(PropertyName = "startDate")]
     public DateOnly StartDate { get; set; }

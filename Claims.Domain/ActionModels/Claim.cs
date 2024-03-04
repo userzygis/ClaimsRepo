@@ -5,8 +5,8 @@ namespace Claims.Domain.ActionModels
 {
     public class Claim
     {
-        [JsonProperty(PropertyName = "id", Required = Required.AllowNull)]
-        public string Id { get; set; }
+        [JsonProperty(PropertyName = "id")]
+        public string? Id { get; set; }
 
         [JsonProperty(PropertyName = "coverId")]
         public string CoverId { get; set; }
