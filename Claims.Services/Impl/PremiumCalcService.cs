@@ -5,6 +5,7 @@ namespace Claims.Services.Impl
 {
     public class PremiumCalcService: IPremiumCalcService
     {
+        private const int baseDayRate = 1250;
         public async Task<decimal> ComputePremiumAsync(IComputePremiumData data)
         {
             //todo run each part async: if (i < 30), if (i < 180), if (i < 365)
@@ -12,7 +13,9 @@ namespace Claims.Services.Impl
             return await Task.Run(() => ComputePremium(data.StartDate, data.EndDate, data.CoverType));
         }
 
-        private decimal ComputePremium(DateOnly startDate, DateOnly endDate, CoverType coverType)
+        public int BaseDayRate { get { return baseDayRate; } }
+
+        public decimal GetMultiplier(CoverType coverType)
         {
             var multiplier = 1.3m;
             if (coverType == CoverType.Yacht)
@@ -29,8 +32,13 @@ namespace Claims.Services.Impl
             {
                 multiplier = 1.5m;
             }
+            return multiplier;
+        }
 
-            var premiumPerDay = 1250 * multiplier;
+        private decimal ComputePremium(DateOnly startDate, DateOnly endDate, CoverType coverType)
+        {
+            var multiplier = GetMultiplier(coverType);
+            var premiumPerDay = baseDayRate * multiplier;
             var insuranceLength = endDate.DayNumber - startDate.DayNumber;
             var totalPremium = 0m;
 
@@ -38,10 +46,10 @@ namespace Claims.Services.Impl
             for (var i = 0; i < insuranceLength; i++)
             {
                 if (i < 30) totalPremium += premiumPerDay;
-                if (i < 180 && coverType == CoverType.Yacht) totalPremium += premiumPerDay - premiumPerDay * 0.05m;
-                else if (i < 180) totalPremium += premiumPerDay - premiumPerDay * 0.02m;
-                if (i < 365 && coverType != CoverType.Yacht) totalPremium += premiumPerDay - premiumPerDay * 0.03m;
-                else if (i < 365) totalPremium += premiumPerDay - premiumPerDay * 0.08m;
+                else if (i < 150 && coverType == CoverType.Yacht) totalPremium += premiumPerDay - premiumPerDay * 0.05m;
+                else if (i < 150) totalPremium += premiumPerDay - premiumPerDay * 0.02m;
+                else if (i < 365 && coverType == CoverType.Yacht) totalPremium += premiumPerDay - premiumPerDay * 0.03m;
+                else if (i < 365) totalPremium += premiumPerDay - premiumPerDay * 0.01m;
             }
 
             return totalPremium;

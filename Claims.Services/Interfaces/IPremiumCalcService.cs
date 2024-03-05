@@ -1,10 +1,11 @@
-﻿using Claims.ActionModels.Requests.CoverRequests;
-using Claims.Domain.ActionModels;
+﻿using Claims.Domain.ActionModels;
 
 namespace Claims.Services.Interfaces
 {
     public interface IPremiumCalcService
     {
-        public Task<decimal> ComputePremiumAsync(IComputePremiumData data);
+        Task<decimal> ComputePremiumAsync(IComputePremiumData data);
+        int BaseDayRate { get; }
+        decimal GetMultiplier(CoverType coverType);
     }
 }
