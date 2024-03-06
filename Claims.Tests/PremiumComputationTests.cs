@@ -98,13 +98,17 @@ namespace Claims.Tests
         }
 
         /// <summary>
-        /// Base day rate was set to be 1250.
+        /// Base day rate was set to be 1250 for all CoverTypes.
         /// </summary>
         /// <returns></returns>
         [Fact]
-        public void BaseDayRate1250()
+        public void BaseDayRate1250ForAllCoverTypes()
         {
-            Assert.Equal(1250, premiumCalcService.BaseDayRate);
+            Assert.Equal(1250, premiumCalcService.GetBaseDayRate(CoverType.Yacht));
+            Assert.Equal(1250, premiumCalcService.GetBaseDayRate(CoverType.PassengerShip));
+            Assert.Equal(1250, premiumCalcService.GetBaseDayRate(CoverType.Tanker));
+            Assert.Equal(1250, premiumCalcService.GetBaseDayRate(CoverType.BulkCarrier));
+            Assert.Equal(1250, premiumCalcService.GetBaseDayRate(CoverType.ContainerShip));
         }
 
         /// <summary>
@@ -153,7 +157,7 @@ namespace Claims.Tests
                 data.CoverType = CoverType.ContainerShip;
                 var totalDayPremiumContainerShip = await premiumCalcService.ComputePremiumAsync(data);
 
-                var div = i * premiumCalcService.BaseDayRate;
+                var div = i * premiumCalcService.GetBaseDayRate(null);
                 Assert.Equal(1.1m, totalDayPremiumYacht/div);
                 Assert.Equal(1.2m, totalDayPremiumPassengerShip/div);
                 Assert.Equal(1.5m, totalDayPremiumTanker/div);
@@ -206,7 +210,7 @@ namespace Claims.Tests
                 var totalDayPremiumForCoverType = await premiumCalcService.ComputePremiumAsync(data);
                 var premium150Days = await Get150DaysPremiumWithDiscount(data.CoverType);
                 var premium151days = totalDayPremiumForCoverType - premium150Days;
-                var premiumPerDay = premiumCalcService.BaseDayRate * premiumCalcService.GetMultiplier(data.CoverType);
+                var premiumPerDay = premiumCalcService.GetBaseDayRate(data.CoverType) * premiumCalcService.GetMultiplier(data.CoverType);
                 var discount = premiumPerDay / (premium151days / (i - 150));
                 Assert.Equal(discountShouldBe, decimal.Round(discount, 2));
             }
@@ -226,7 +230,7 @@ namespace Claims.Tests
                 var totalDayPremiumForCoverType = await premiumCalcService.ComputePremiumAsync(data);
                 var premium30Days = await Get30DaysPremiumWithNoDiscount(data.CoverType);
                 var premium31_150days = totalDayPremiumForCoverType - premium30Days;
-                var premiumPerDay = premiumCalcService.BaseDayRate * premiumCalcService.GetMultiplier(data.CoverType);
+                var premiumPerDay = premiumCalcService.GetBaseDayRate(coverType) * premiumCalcService.GetMultiplier(data.CoverType);
                 var discount = premiumPerDay / (premium31_150days / (i - 30));
                 Assert.Equal(discountShouldBe, decimal.Round(discount, 2));
             }
